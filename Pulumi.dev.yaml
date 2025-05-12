@@ -22,3 +22,4 @@ config:
     name: "rag-api"
     description: "RAG API Gateway"
     stageName: "prod"
+    
