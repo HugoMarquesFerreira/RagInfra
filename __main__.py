@@ -32,55 +32,6 @@ API_NAME = api_gw_config['name']
 API_DESCRIPTION = api_gw_config['description']
 API_STAGE_NAME = api_gw_config['stageName']
 
-# ==============================
-# Security Group para a Lambda
-# ==============================
-lambda_sg = aws.ec2.SecurityGroup(
-    "lambdaSecurityGroup",
-    description="Security Group for Lambda to access internet via NAT",
-    vpc_id=VPC_ID,
-    egress=[{
-        "protocol": "-1",
-        "from_port": 0,
-        "to_port": 0,
-        "cidr_blocks": ["0.0.0.0/0"],
-    }]
-)
-
-lambda_sg = aws.ec2.SecurityGroup(
-    "lambdaSecurityGroup2",
-    description="Security Group for Lambda to access internet via NAT",
-    vpc_id=VPC_ID,
-    ingress=[
-        {
-            "protocol": "-1",
-            "from_port": 0,
-            "to_port": 0,
-            "security_groups": [sg_id],
-        } for sg_id in ALLOWED_SG_IDS + [pulumi.Output.secret(lambda_sg.id)]
-    ],
-    egress=[{
-        "protocol": "-1",
-        "from_port": 0,
-        "to_port": 0,
-        "cidr_blocks": ["0.0.0.0/0"],
-    }]
-)
-
-
-# Regras: permite entrada dos SGs permitidos na config (nomes únicos por SG)
-for sg_id in ALLOWED_SG_IDS:
-    rule_name = f"lambdaAllowFromExtraSG-{sg_id.replace('sg-', '')}"
-    aws.ec2.SecurityGroupRule(
-        rule_name,
-        type="ingress",
-        from_port=0,
-        to_port=0,
-        protocol="-1",
-        security_group_id=lambda_sg.id,
-        source_security_group_id=sg_id
-    )
-
 # -----------------------
 # IAM: Papéis e Políticas
 # -----------------------
@@ -111,7 +62,7 @@ lambda_rag = aws.lambda_.Function(
     },
     vpc_config={
         "subnet_ids": SUBNET_IDS,
-        "security_group_ids": [lambda_sg.id] + ALLOWED_SG_IDS
+        "security_group_ids": ALLOWED_SG_IDS
     },
 )
 
@@ -201,4 +152,4 @@ stage = aws.apigateway.Stage(
 # =======================
 pulumi.export("api_url", stage.invoke_url.apply(lambda url: f"{url}"))
 pulumi.export("lambda_arn", lambda_rag.arn)
-pulumi.export("lambda_sg_id", lambda_sg.id)
+pulumi.export("lambda_sg_id", "N/A - using existing SGs")
