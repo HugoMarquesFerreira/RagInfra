@@ -47,7 +47,7 @@ lambda_sg = aws.ec2.SecurityGroup(
     }]
 )
 
-# Regras de Ingress
+# Regras de Ingress - permite entrada do próprio SG (self-reference)
 aws.ec2.SecurityGroupRule(
     "lambdaAllowFromSGs",
     type="ingress",
@@ -58,15 +58,20 @@ aws.ec2.SecurityGroupRule(
     source_security_group_id=lambda_sg.id
 )
 
-aws.ec2.SecurityGroupRule(
-    "lambdaAllowFromExtraSG",
-    type="ingress",
-    from_port=0,
-    to_port=0,
-    protocol="-1",
-    security_group_id=lambda_sg.id,
-    source_security_group_id=ALLOWED_SG_IDS
-)
+# Regras de Ingress - permite entrada dos SGs permitidos na config
+ALLOWED_SG_IDS = config.require_object('allowedSecurityGroupIds')
+
+for idx, sg_id in enumerate(ALLOWED_SG_IDS):
+    aws.ec2.SecurityGroupRule(
+        f"lambdaAllowFromExtraSG{idx}",
+        type="ingress",
+        from_port=0,
+        to_port=0,
+        protocol="-1",
+        security_group_id=lambda_sg.id,
+        source_security_group_id=sg_id
+    )
+
 
 # -----------------------
 # IAM: Papéis e Políticas
