@@ -43,6 +43,19 @@ aws.iam.RolePolicyAttachment(
     policy_arn=aws.iam.ManagedPolicy.AWS_LAMBDA_BASIC_EXECUTION_ROLE,
 )
 
+lambda_sg = aws.ec2.SecurityGroup(
+    "lambdaSecurityGroup",
+    description="Temporary marker to retain",
+    vpc_id=VPC_ID,
+    egress=[{
+        "protocol": "-1",
+        "from_port": 0,
+        "to_port": 0,
+        "cidr_blocks": ["0.0.0.0/0"],
+    }],
+)
+
+
 # =======================
 # Função Lambda
 # =======================

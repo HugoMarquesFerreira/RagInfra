@@ -53,7 +53,7 @@ Você pode alterar as configurações diretamente no `pulumi.dev.yaml`. Abaixo a
 
 ```yaml
 aws:region: us-east-1                # Região da AWS
-account_id: 777825471459            # ID da conta AWS
+account_id:           # ID da conta AWS
 indecx-infra:vpcId: "vpc-..."       # VPC onde a Lambda será criada
 indecx-infra:subnetIds:             # Subnets privadas da VPC
   - "subnet-..."                    
