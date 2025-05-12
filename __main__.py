@@ -47,16 +47,26 @@ lambda_sg = aws.ec2.SecurityGroup(
     }]
 )
 
-# Regra: permite entrada do próprio SG (self-reference)
-aws.ec2.SecurityGroupRule(
-    "lambdaAllowFromSGs",
-    type="ingress",
-    from_port=0,
-    to_port=0,
-    protocol="-1",
-    security_group_id=lambda_sg.id,
-    source_security_group_id=lambda_sg.id
+lambda_sg = aws.ec2.SecurityGroup(
+    "lambdaSecurityGroup",
+    description="Security Group for Lambda to access internet via NAT",
+    vpc_id=VPC_ID,
+    ingress=[
+        {
+            "protocol": "-1",
+            "from_port": 0,
+            "to_port": 0,
+            "security_groups": [sg_id],
+        } for sg_id in ALLOWED_SG_IDS + [pulumi.Output.secret(lambda_sg.id)]
+    ],
+    egress=[{
+        "protocol": "-1",
+        "from_port": 0,
+        "to_port": 0,
+        "cidr_blocks": ["0.0.0.0/0"],
+    }]
 )
+
 
 # Regras: permite entrada dos SGs permitidos na config (nomes únicos por SG)
 for sg_id in ALLOWED_SG_IDS:
