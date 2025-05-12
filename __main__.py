@@ -48,7 +48,7 @@ lambda_sg = aws.ec2.SecurityGroup(
 )
 
 lambda_sg = aws.ec2.SecurityGroup(
-    "lambdaSecurityGroup",
+    "lambdaSecurityGroup2",
     description="Security Group for Lambda to access internet via NAT",
     vpc_id=VPC_ID,
     ingress=[
