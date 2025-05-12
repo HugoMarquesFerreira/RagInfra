@@ -1,0 +1,24 @@
+
+config:
+  aws:region: us-east-1
+  account_id: 777825471459
+  project: Rag
+  environment: prod
+  indecx-infra:vpcId: "vpc-02a7ce2268b66abf5"
+  indecx-infra:subnetIds:
+    - "subnet-031e522aa26ec43aa"  # private 1a
+    - "subnet-084f75f00b0acdff6"   # private 1b
+  indecx-infra:allowedSecurityGroupIds:
+    - "sg-02dcf9d55ce6be6e3"
+
+  indecx-infra:lambdaConfig:
+    imageUri: "777825471459.dkr.ecr.us-east-1.amazonaws.com/rag:latest0.34"
+    timeout: 900
+    memorySize: 512
+  indecx-infra:qdrantConfig:
+    host: "http://3.217.237.120:6333"
+    apiKey: "QRxmxezToJ84SsQMZEuHqya9cWStRKKq75yspFJVGOamyT_LpHa40Q"
+  indecx-infra:apiGatewayConfig:
+    name: "rag-api"
+    description: "RAG API Gateway"
+    stageName: "prod"
