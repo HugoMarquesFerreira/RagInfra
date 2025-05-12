@@ -10,6 +10,7 @@ config:
     - "subnet-084f75f00b0acdff6"   # private 1b
   indecx-infra:allowedSecurityGroupIds:
     - "sg-02dcf9d55ce6be6e3"
+    - "sg-01002166065034e5f"
   indecx-infra:lambdaConfig:
     imageUri: "777825471459.dkr.ecr.us-east-1.amazonaws.com/rag:latest0.34"
     timeout: 900
