@@ -13,7 +13,7 @@ config = pulumi.Config('indecx-infra')
 # Configurações de Rede
 VPC_ID = config.require('vpcId')
 SUBNET_IDS = config.require_object('subnetIds')
-ALLOWED_SG_IDS = config.require('allowedSecurityGroupIds')
+ALLOWED_SG_IDS = config.require_object('allowedSecurityGroupIds')
 
 # Configurações da Lambda
 lambda_config = config.require_object('lambdaConfig')
@@ -47,7 +47,7 @@ lambda_sg = aws.ec2.SecurityGroup(
     }]
 )
 
-# Regras de Ingress - permite entrada do próprio SG (self-reference)
+# Regra: permite entrada do próprio SG (self-reference)
 aws.ec2.SecurityGroupRule(
     "lambdaAllowFromSGs",
     type="ingress",
@@ -58,12 +58,11 @@ aws.ec2.SecurityGroupRule(
     source_security_group_id=lambda_sg.id
 )
 
-# Regras de Ingress - permite entrada dos SGs permitidos na config
-ALLOWED_SG_IDS = config.require_object('allowedSecurityGroupIds')
-
-for idx, sg_id in enumerate(ALLOWED_SG_IDS):
+# Regras: permite entrada dos SGs permitidos na config (nomes únicos por SG)
+for sg_id in ALLOWED_SG_IDS:
+    rule_name = f"lambdaAllowFromExtraSG-{sg_id.replace('sg-', '')}"
     aws.ec2.SecurityGroupRule(
-        f"lambdaAllowFromExtraSG{idx}",
+        rule_name,
         type="ingress",
         from_port=0,
         to_port=0,
@@ -71,7 +70,6 @@ for idx, sg_id in enumerate(ALLOWED_SG_IDS):
         security_group_id=lambda_sg.id,
         source_security_group_id=sg_id
     )
-
 
 # -----------------------
 # IAM: Papéis e Políticas
@@ -87,19 +85,6 @@ aws.iam.RolePolicyAttachment(
 # =======================
 # Função Lambda
 # =======================
-ALLOWED_SG_IDS = config.require_object('allowedSecurityGroupIds')
-
-for idx, sg_id in enumerate(ALLOWED_SG_IDS):
-    aws.ec2.SecurityGroupRule(
-        f"lambdaAllowFromExtraSG{idx}",
-        type="ingress",
-        from_port=0,
-        to_port=0,
-        protocol="-1",
-        security_group_id=lambda_sg.id,
-        source_security_group_id=sg_id
-    )
-
 lambda_rag = aws.lambda_.Function(
     "ragFastApiLambda",
     package_type="Image",
